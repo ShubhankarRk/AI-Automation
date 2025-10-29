@@ -1,0 +1,144 @@
+{
+  "name": "Order Update Mails",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "https://airtable.com/appMeiSmho5bAigYd/tbluQVt5bNwy5ZXpp/viwBk2OQGEnQINkDL?blocks=hide",
+          "mode": "url"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "https://airtable.com/appMeiSmho5bAigYd/tbluQVt5bNwy5ZXpp/viwBk2OQGEnQINkDL?blocks=hide",
+          "mode": "url"
+        },
+        "triggerField": "Order Number",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5c1eabc4-cb6c-4c23-b360-76e4955419d2",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "d4AlaY3wgKho1kkY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are responsible for customer orders. Your task is to collect incoming information about new orders and create a clear summary that will be sent via email to the team.\nThe email should be signed with “Customer Success Team”.\n\n\nHere are the details of the customer orders:\n\nOrder Number:{{ $json.fields['Order Number'] }}\nCustomer:{{ $json.fields.Customer }}\nProduct:{{ $json.fields.Product }}\nQuantity:{{ $json.fields.Quantity }}\nPrice:{{ $json.fields.Price }}\nDate:{{ $json.fields.Date }}\nStatus:{{ $json.fields.Status }}\n\n\nPlease provide the following output parameters:\n\nEmail_subject\nEmail_content\n\nmake a clean and readable body with new lines if needed"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "71b5f4d1-e832-452a-8e8b-97ff38e617ef",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "83RzRe6NY43Wxy9N",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mails@shubrk.com",
+        "subject": "={{ $json.output[0].content[0].text.Email_subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output[0].content[0].text.Email_content }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        0
+      ],
+      "id": "625370ae-8ddf-4463-bf56-3480094174c8",
+      "name": "Send a message",
+      "webhookId": "38a0e9b8-7f87-4b2e-be7c-9d05b9d78105",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MOdF93vyVPlKzzay",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Airtable Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "526917a0-eb72-4b62-95c8-be348673aca4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aac7c583aea0f661a99ba19b7318acfaa62d133fa76db59f991e7cbb07e10094"
+  },
+  "id": "8klUV9wO8Hhwjt6K",
+  "tags": []
+}
