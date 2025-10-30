@@ -1,0 +1,249 @@
+{
+  "name": "RAG Financial Chat Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hola! 👋\nMy name is Jeff. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "54fdca0c-9411-4fbb-acb7-617c0cba4633",
+      "name": "When chat message received",
+      "webhookId": "82010c06-c2ad-4a5f-a482-06b99d6e5a03"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are an AI assistant specialized in analyzing tesla's qaurterly financial reports. your primary task is to answer questions accurately and precisely using the vector database, which contains relevant documents(Q2 and Q3 reports).\n\nOnly provide information that you retrieve form the documents (or verified expert knowledge). If something is not included in the dataset or it is unclear, clearly state that you do not have sufficient information.\n\nStructure of your response:\n- Concise and to the point\n- Specific Numbers and facts, when available\n- Clearly indicate which qaurtely report (Q2 or Q3) the information comes from\n\nObjective:\nProvide users wiht reliable and quick insights into Tesla's qaurterly financials without unnecessary details."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f17217a7-7e18-4ad3-a4ce-664b817d1b56",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        208
+      ],
+      "id": "d86bd4bf-c133-4d4d-b95b-9d5a0ce43a4c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "83RzRe6NY43Wxy9N",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        208
+      ],
+      "id": "41b7c755-44ee-4062-b4e2-9df9df9b8652",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8ntes",
+          "mode": "list",
+          "cachedResultName": "n8ntes"
+        },
+        "options": {
+          "pineconeNamespace": "n8ntsla"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        368
+      ],
+      "id": "71ebdd2d-f1c4-4406-8306-70bbe0e11254",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "IybHILai9BbHzUg3",
+          "name": "PineconeApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        528
+      ],
+      "id": "21b81eed-7b83-40bc-807c-115d5926d7ad",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "83RzRe6NY43Wxy9N",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        352
+      ],
+      "id": "c561eccd-1f87-4cbe-9667-fafe2796e3ef",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "83RzRe6NY43Wxy9N",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "returns documents related to Tesla Q2 and Q3, the financials, outlook, mergers and anything important from the earnings reports."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        208
+      ],
+      "id": "fd249cb2-31d5-4268-aab4-816ec8cc9134",
+      "name": "doc"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "doc",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "doc",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "doc": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4734191d-be15-4609-8b50-d64ce7a1bd6f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aac7c583aea0f661a99ba19b7318acfaa62d133fa76db59f991e7cbb07e10094"
+  },
+  "id": "FJrAnYnFuawcgTdv",
+  "tags": []
+}
